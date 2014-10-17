@@ -18,6 +18,9 @@ type logger struct {
 	currentSize uint64
 	maxSize     uint64
 	records     []LogRecord
+	lfa         LogFullAction
+	as          AdministrativeState
+	os          OperationalState
 }
 
 func (l *logger) GetMaxSize() (uint64, error) {
@@ -34,11 +37,43 @@ func (l *logger) GetCurrentSize() (uint64, error) {
 	return l.currentSize, nil
 }
 
-func (l *logger) GetNRecords() (uint64, error) {
+func (l *logger) GetNumRecords() (uint64, error) {
 	if l.err != nil {
 		return 0, l.err
 	}
 	return uint64(len(l.records)), nil
+}
+
+func (l *logger) GetLogFullAction() (LogFullAction, error) {
+	if l.err != nil {
+		return l.lfa, l.err
+	}
+	return l.lfa, nil
+}
+
+func (l *logger) GetAdministrativeState() (AdministrativeState, error) {
+	if l.err != nil {
+		return l.as, l.err
+	}
+	return l.as, nil
+}
+
+func (l *logger) GetOperationalState() (OperationalState, error) {
+	if l.err != nil {
+		return l.os, l.err
+	}
+	return l.os, nil
+}
+
+func (l *logger) GetAvailabilityStatus() (AvailabilityStatus, error) {
+	st := AvailabilityStatus{
+		OffDuty: l.as == LOCKED || l.os == DISABLED,
+		LogFull: l.currentSize >= l.maxSize,
+	}
+	if l.err != nil {
+		return st, l.err
+	}
+	return st, nil
 }
 
 func (l *logger) SetMaxSize(s uint64) error {
@@ -83,7 +118,8 @@ func (l *logger) WriteRecord(record *ProducerLogRecord) error {
 	lr := LogRecord{
 		Id:   RecordId(len(l.records) + 1),
 		Time: currentTime(),
-		Info: *record}
+		Info: *record,
+	}
 	l.records = append(l.records, lr)
 	l.currentSize += uint64(unsafe.Sizeof(lr))
 	return nil
@@ -94,5 +130,8 @@ func (l *logger) init() error {
 	l.currentSize = 0
 	l.maxSize = 0
 	l.records = make([]LogRecord, 0, 10)
+	l.lfa = HALT
+	l.as = UNLOCKED
+	l.os = ENABLED
 	return nil
 }
