@@ -94,3 +94,37 @@ type LogConsumer interface {
 	RetrieveRecordsByProducerName(*RecordId, *uint32, []string) ([]LogRecord, error)
 	RetrieveRecordsByProducerId(*RecordId, *uint32, []string) ([]LogRecord, error)
 }
+
+// Does not compile because of duplicate method (diamond pattern on LogStatus)
+//
+// type Log interface {
+// 	LogProducer
+// 	LogAdministrator
+// 	LogConsumer
+// }
+//
+//
+// This means that a naive but working IDL to Go compiler should copy base
+// method in interface declaration rather than embed
+
+type Log interface {
+	GetMaxSize() (uint64, error)
+	GetCurrentSize() (uint64, error)
+	GetNumRecords() (uint64, error)
+	GetLogFullAction() (LogFullAction, error)
+	GetAdministrativeState() (AdministrativeState, error)
+	GetAvailabilityStatus() (AvailabilityStatus, error)
+	GetOperationalState() (OperationalState, error)
+	SetMaxSize(uint64) error
+	SetLogFullAction(LogFullAction) error
+	SetAdministrativeState(AdministrativeState) error
+	ClearLog() error
+	Destroy() error
+	WriteRecords([]ProducerLogRecord) error
+	WriteRecord(*ProducerLogRecord) error
+	GetRecordIdFromTime(LogTime) (RecordId, error)
+	RetrieveRecords(*RecordId, *uint32) ([]LogRecord, error)
+	RetrieveRecordsByLevel(*RecordId, *uint32, []LogLevel) ([]LogRecord, error)
+	RetrieveRecordsByProducerName(*RecordId, *uint32, []string) ([]LogRecord, error)
+	RetrieveRecordsByProducerId(*RecordId, *uint32, []string) ([]LogRecord, error)
+}
