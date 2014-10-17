@@ -2,6 +2,7 @@ package goltlog
 
 import (
 	"time"
+	"unsafe"
 )
 
 func currentTime() LogTime {
@@ -84,6 +85,7 @@ func (l *logger) WriteRecord(record *ProducerLogRecord) error {
 		Time: currentTime(),
 		Info: *record}
 	l.records = append(l.records, lr)
+	l.currentSize += uint64(unsafe.Sizeof(lr))
 	return nil
 }
 
