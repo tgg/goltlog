@@ -1,6 +1,6 @@
 package goltlog
 
-func NewLogger(method string) (LogProducer, error) {
+func NewLog(method string) (Log, error) {
 	l := new(logger)
 	if err := l.init(); err != nil {
 		return nil, err
