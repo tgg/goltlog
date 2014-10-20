@@ -66,11 +66,6 @@ type LogStatus interface {
 	GetOperationalState() (OperationalState, error)
 }
 
-type errInvalidParam struct {
-	error
-	Details string
-}
-
 type LogAdministrator interface {
 	LogStatus
 	SetMaxSize(uint64) error
