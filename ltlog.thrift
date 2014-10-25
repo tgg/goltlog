@@ -1,4 +1,6 @@
-namespace go gotltlog
+// Compile from upper level with:
+//  thrift -out . -gen go:thrift_import=git-wip-us.apache.org/repos/asf/thrift.git/lib/go/thrift  goltlog/ltlog.thrift
+namespace go goltlog.rpc_thrift
 
 // No unsigned types in thrift. Recommendations are:
 // 1. use next bigger type; or
@@ -81,16 +83,6 @@ service LogConsumer extends LogStatus {
   RecordIdU32LogRecordSequence retrieve_records_by_producer_name(1:RecordId currentId, 2:u32 howMany, 3:StringSeq valueList)
 }
 service LogProducer extends LogStatus {
-  oneway void write_records(1:ProducerLogRecordSequence records)
-  oneway void write_record(1:ProducerLogRecord record)
-}
-// extends limited to a single type, so we copy/paste others here
-service Log extends LogConsumer {
-  void set_max_size(1:u64 size) throws (1:InvalidParam ouch)
-  void set_log_full_action(1:LogFullAction action)
-  void set_administrative_state(1:AdministrativeState state)
-  void clear_log()
-  void destroy ()
   oneway void write_records(1:ProducerLogRecordSequence records)
   oneway void write_record(1:ProducerLogRecord record)
 }
