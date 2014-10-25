@@ -1,10 +1,20 @@
 package goltlog
 
-func NewLog(method string) (Log, error) {
-	l := new(logger)
-	if err := l.init(); err != nil {
-		return nil, err
-	}
+import (
+	"errors"
+)
 
-	return l, nil
+func NewLog(method string) (Log, error) {
+	switch (method) {
+	case "local":
+		l := new(logger)
+		if err := l.init(); err != nil {
+			return nil, err
+		}
+
+		return l, nil
+
+	default:
+		return nil, errors.New("Unsupported method")	
+	}
 }
