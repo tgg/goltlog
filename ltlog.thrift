@@ -75,14 +75,16 @@ struct RecordIdU32LogRecordSequence {
   2: u32 howMany
   3: LogRecordSequence result
 }
-service LogConsumer extends LogStatus {
+service LogConsumer extends LogAdministrator {
   RecordId get_record_id_from_time(1:LogTime fromTime)
   RecordIdU32LogRecordSequence retrieve_records(1:RecordId currentId, 2:u32 howMany)
   RecordIdU32LogRecordSequence retrieve_records_by_level(1:RecordId currentId, 2:u32 howMany, 3:LogLevelSequence valueList)
   RecordIdU32LogRecordSequence retrieve_records_by_producer_id(1:RecordId currentId, 2:u32 howMany, 3:StringSeq valueList)
   RecordIdU32LogRecordSequence retrieve_records_by_producer_name(1:RecordId currentId, 2:u32 howMany, 3:StringSeq valueList)
 }
-service LogProducer extends LogStatus {
+service LogProducer extends LogConsumer {
   oneway void write_records(1:ProducerLogRecordSequence records)
   oneway void write_record(1:ProducerLogRecord record)
+}
+service Log extends LogProducer {
 }
