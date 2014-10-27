@@ -19,8 +19,8 @@ func min(a, b int) int {
 func currentTime() LogTime {
 	now := time.Now().UTC()
 	return LogTime{
-		Seconds:     now.Unix(),
-		NanoSeconds: int64(now.Nanosecond()),
+		Seconds:     int32(now.Unix()),
+		NanoSeconds: int32(now.Nanosecond()),
 	}
 }
 
