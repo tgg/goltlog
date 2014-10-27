@@ -20,12 +20,12 @@ func currentTime() LogTime {
 	now := time.Now().UTC()
 	return LogTime{
 		Seconds:     int32(now.Unix()),
-		NanoSeconds: int32(now.Nanosecond()),
+		Nanoseconds: int32(now.Nanosecond()),
 	}
 }
 
 func (t LogTime) geq(o LogTime) bool {
-	return t.Seconds > o.Seconds || (t.Seconds == o.Seconds && t.NanoSeconds >= o.NanoSeconds)
+	return t.Seconds > o.Seconds || (t.Seconds == o.Seconds && t.Nanoseconds >= o.Nanoseconds)
 }
 
 type logger struct {

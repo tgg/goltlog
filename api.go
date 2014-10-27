@@ -40,7 +40,7 @@ type AvailabilityStatus struct {
 
 type LogTime struct {
 	Seconds     int32
-	NanoSeconds int32
+	Nanoseconds int32
 }
 
 type ProducerLogRecord struct {
