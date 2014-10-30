@@ -8,6 +8,14 @@ import (
 	"net"
 )
 
+func NewLocalLog() (l Log, err error) {
+	m := new(logger)
+	if err = m.init(); err == nil {
+		l = m
+	}
+	return
+}
+
 func NewThriftLog(h string, p int) (l Log, err error) {
 	var trans thrift.TTransport
 	portStr := fmt.Sprint(p)
@@ -27,16 +35,10 @@ func NewThriftLog(h string, p int) (l Log, err error) {
 func NewLog(method string) (Log, error) {
 	switch (method) {
 	case "local":
-		l := new(logger)
-		if err := l.init(); err != nil {
-			return nil, err
-		}
-
-		return l, nil
+		return NewLocalLog()
 
 	case "thrift":
-		l, err := NewThriftLog("localhost", 12345)
-		return l, err
+		return NewThriftLog("localhost", 12345)
 
 	default:
 		return nil, errors.New("Unsupported method")	
