@@ -128,8 +128,12 @@ func (p *thrift_cli) ClearLog() error {
 	return p.client.ClearLog()
 }
 
-func (p *thrift_cli) Destroy() error {
-	return p.client.Destroy()
+func (p *thrift_cli) Destroy() (err error) {
+	err = p.client.Destroy()
+	if (err == nil) {
+		err = p.client.Transport.Close()
+	}
+	return
 }
 
 func (p *thrift_cli) WriteRecords(r []ProducerLogRecord) error {

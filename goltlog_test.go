@@ -9,9 +9,16 @@ var (
 	err error
 	nr uint64
 )
+func TestLocal(t *testing.T) {
+	testImpl(t, "local")
+}
 
-func TestApi(t *testing.T) {
-	if l, err = NewLog("local"); err != nil {
+// func TestThrift(t *testing.T) {
+// 	testImpl(t, "thrift")
+// }
+
+func testImpl(t *testing.T, m string) {
+	if l, err = NewLog(m); err != nil {
 		t.Errorf("logger creation failed %v", err)
 	}
 	r := &ProducerLogRecord{
