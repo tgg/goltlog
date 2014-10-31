@@ -16,19 +16,38 @@ func NewLocalLog() (l Log, err error) {
 	return
 }
 
-func NewThriftLog(h string, p int) (l Log, err error) {
+func NewThriftLogClient(h string, p int) (l Log, err error) {
 	var trans thrift.TTransport
 	portStr := fmt.Sprint(p)
 	if trans, err = thrift.NewTSocket(net.JoinHostPort(h, portStr)); err != nil {
 		return
 	}
-	var protocolFactory thrift.TProtocolFactory
-	protocolFactory = thrift.NewTBinaryProtocolFactoryDefault()
+	protocolFactory := thrift.NewTBinaryProtocolFactoryDefault()
 	client := rpc_thrift.NewLogClientFactory(trans, protocolFactory)
 	if err = trans.Open(); err != nil {
 		return
 	}
-	l = &thrift_cli{client: client}
+	l = &thrift_cli{cli: client}
+	return
+}
+
+func NewThriftLogServer(h string, p int) (l rpc_thrift.Log, err error) {
+	var trans thrift.TServerTransport
+	portStr := fmt.Sprint(p)
+	if trans, err = thrift.NewTServerSocket(net.JoinHostPort(h, portStr)); err != nil {
+		
+	}
+	protocolFactory := thrift.NewTBinaryProtocolFactoryDefault()
+	handler, err := NewLocalLog()
+	if err != nil {
+		return
+	}
+
+	l = &thrift_han{srv: handler}
+	processor := rpc_thrift.NewLogProcessor(l)
+	transportFactory := thrift.NewTTransportFactory()
+	server := thrift.NewTSimpleServer4(processor, trans, transportFactory, protocolFactory)
+	go server.Serve()
 	return
 }
 
@@ -38,7 +57,11 @@ func NewLog(method string) (Log, error) {
 		return NewLocalLog()
 
 	case "thrift":
-		return NewThriftLog("localhost", 12345)
+		if _, err := NewThriftLogServer("localhost", 12345); err == nil {
+			return NewThriftLogClient("localhost", 12345)			
+		} else {
+			return nil, err
+		}
 
 	default:
 		return nil, errors.New("Unsupported method")	

@@ -13,14 +13,15 @@ func TestLocal(t *testing.T) {
 	testImpl(t, "local")
 }
 
-// func TestThrift(t *testing.T) {
-// 	testImpl(t, "thrift")
-// }
+func TestThrift(t *testing.T) {
+	testImpl(t, "thrift")
+}
 
 func testImpl(t *testing.T, m string) {
 	if l, err = NewLog(m); err != nil {
 		t.Errorf("logger creation failed %v", err)
 	}
+	defer l.Destroy()
 	r := &ProducerLogRecord{
 		ProducerId: "0",
 		ProducerName: "me",

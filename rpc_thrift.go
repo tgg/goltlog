@@ -1,17 +1,19 @@
 package goltlog
 
+//go:generate thrift -out .. -gen go:thrift_import=git-wip-us.apache.org/repos/asf/thrift.git/lib/go/thrift ltlog.thrift
+
 import (
 	"errors"
 	"github.com/tgg/goltlog/rpc_thrift"
 )
 
 type thrift_cli struct {
-	client *rpc_thrift.LogClient
+	cli *rpc_thrift.LogClient
 }
 
 func (p *thrift_cli) GetMaxSize() (r uint64, err error) {
 	var r_ rpc_thrift.U64
-	if r_, err = p.client.GetMaxSize(); err != nil {
+	if r_, err = p.cli.GetMaxSize(); err != nil {
 		r = 0
 		return
 	}
@@ -21,7 +23,7 @@ func (p *thrift_cli) GetMaxSize() (r uint64, err error) {
 
 func (p *thrift_cli) GetCurrentSize() (r uint64, err error) {
 	var r_ rpc_thrift.U64
-	if r_, err = p.client.GetCurrentSize(); err != nil {
+	if r_, err = p.cli.GetCurrentSize(); err != nil {
 		r = 0
 		return
 	}
@@ -31,7 +33,7 @@ func (p *thrift_cli) GetCurrentSize() (r uint64, err error) {
 
 func (p *thrift_cli) GetNumRecords() (r uint64, err error) {
 	var r_ rpc_thrift.U64
-	if r_, err = p.client.GetNRecords(); err != nil {
+	if r_, err = p.cli.GetNRecords(); err != nil {
 		r = 0
 		return
 	}
@@ -41,7 +43,7 @@ func (p *thrift_cli) GetNumRecords() (r uint64, err error) {
 
 func (p *thrift_cli) GetLogFullAction() (r LogFullAction, err error) {
 	var r_ rpc_thrift.LogFullAction
-	if r_, err = p.client.GetLogFullAction(); err != nil {
+	if r_, err = p.cli.GetLogFullAction(); err != nil {
 		r = HALT
 		return
 	}
@@ -55,7 +57,7 @@ func (p *thrift_cli) GetLogFullAction() (r LogFullAction, err error) {
 
 func (p *thrift_cli) GetAdministrativeState() (r AdministrativeState, err error) {
 	var r_ rpc_thrift.AdministrativeState
-	if r_, err = p.client.GetAdministrativeState(); err != nil {
+	if r_, err = p.cli.GetAdministrativeState(); err != nil {
 		r = LOCKED
 		return
 	}
@@ -69,7 +71,7 @@ func (p *thrift_cli) GetAdministrativeState() (r AdministrativeState, err error)
 
 func (p *thrift_cli) GetAvailabilityStatus() (r AvailabilityStatus, err error) {
 	var r_ *rpc_thrift.AvailabilityStatus
-	if r_, err = p.client.GetAvailabilityStatus(); err != nil {
+	if r_, err = p.cli.GetAvailabilityStatus(); err != nil {
 		r = AvailabilityStatus{OffDuty: true, LogFull: true}
 		return
 	}
@@ -79,7 +81,7 @@ func (p *thrift_cli) GetAvailabilityStatus() (r AvailabilityStatus, err error) {
 
 func (p *thrift_cli) GetOperationalState() (r OperationalState, err error) {
 	var r_ rpc_thrift.OperationalState
-	if r_, err = p.client.GetOperationalState(); err != nil {
+	if r_, err = p.cli.GetOperationalState(); err != nil {
 		r = DISABLED
 		return
 	}
@@ -94,7 +96,7 @@ func (p *thrift_cli) GetOperationalState() (r OperationalState, err error) {
 func (p *thrift_cli) SetMaxSize(s uint64) error {
 	var ouch *rpc_thrift.InvalidParam
 	var err error
-	if ouch, err = p.client.SetMaxSize(rpc_thrift.U64(s)); err != nil {
+	if ouch, err = p.cli.SetMaxSize(rpc_thrift.U64(s)); err != nil {
 		return err
 	}
 	if ouch != nil {
@@ -111,7 +113,7 @@ func (p *thrift_cli) SetLogFullAction(a LogFullAction) error {
 	} else {
 		a_ = rpc_thrift.LogFullAction_WRAP
 	}
-	return p.client.SetLogFullAction(a_)
+	return p.cli.SetLogFullAction(a_)
 }
 
 func (p *thrift_cli) SetAdministrativeState(a AdministrativeState) error {
@@ -121,17 +123,17 @@ func (p *thrift_cli) SetAdministrativeState(a AdministrativeState) error {
 	} else {
 		a_ = rpc_thrift.AdministrativeState_unlocked
 	}
-	return p.client.SetAdministrativeState(a_)
+	return p.cli.SetAdministrativeState(a_)
 }
 
 func (p *thrift_cli) ClearLog() error {
-	return p.client.ClearLog()
+	return p.cli.ClearLog()
 }
 
 func (p *thrift_cli) Destroy() (err error) {
-	err = p.client.Destroy()
+	err = p.cli.Destroy()
 	if (err == nil) {
-		err = p.client.Transport.Close()
+		err = p.cli.Transport.Close()
 	}
 	return
 }
@@ -145,7 +147,7 @@ func (p *thrift_cli) WriteRecords(r []ProducerLogRecord) error {
 			Level: rpc_thrift.LogLevel(e.Level),
 			LogData: e.LogData}
 	}
-	return p.client.WriteRecords(r_)
+	return p.cli.WriteRecords(r_)
 }
 
 func (p *thrift_cli) WriteRecord(r *ProducerLogRecord) error {
@@ -154,14 +156,14 @@ func (p *thrift_cli) WriteRecord(r *ProducerLogRecord) error {
 		ProducerName: r.ProducerName,
 		Level: rpc_thrift.LogLevel(r.Level),
 		LogData: r.LogData}
-	return p.client.WriteRecord(r_)
+	return p.cli.WriteRecord(r_)
 }
 
 func (p *thrift_cli) GetRecordIdFromTime(t LogTime) (RecordId, error) {
 	t_ := &rpc_thrift.LogTime{
 		Seconds: t.Seconds,
 		Nanoseconds: t.Nanoseconds}
-	i, err := p.client.GetRecordIdFromTime(t_)
+	i, err := p.cli.GetRecordIdFromTime(t_)
 	return RecordId(i), err
 }
 
@@ -179,12 +181,29 @@ func convertLogRecord(t []*rpc_thrift.LogRecord) (r []LogRecord) {
 	return
 }
 
+func logRecordConvert(r []LogRecord) (t []*rpc_thrift.LogRecord)  {
+	t = make([]*rpc_thrift.LogRecord, len(r))
+	for i, e := range(r) {
+		t[i] = &rpc_thrift.LogRecord{
+			Id: rpc_thrift.RecordId(e.Id),
+			Time: &rpc_thrift.LogTime{
+				Seconds: e.Time.Seconds,
+				Nanoseconds: e.Time.Nanoseconds},
+			Info: &rpc_thrift.ProducerLogRecord{
+				ProducerId: e.Info.ProducerId,
+				ProducerName: e.Info.ProducerName,
+				Level: rpc_thrift.LogLevel(e.Info.Level),
+				LogData: e.Info.LogData}}
+	}
+	return
+}
+
 func (p *thrift_cli) RetrieveRecords(i *RecordId, h *uint32) (r []LogRecord, err error) {
 	i_ := rpc_thrift.RecordId(*i)
 	h_ := rpc_thrift.U32(*h)
 	r = nil
 	var r_ *rpc_thrift.RecordIdU32LogRecordSequence
-	if r_, err = p.client.RetrieveRecords(i_, h_); err != nil {
+	if r_, err = p.cli.RetrieveRecords(i_, h_); err != nil {
 		return
 	}
 	*i = RecordId(r_.CurrentId)
@@ -202,7 +221,7 @@ func (p *thrift_cli) RetrieveRecordsByLevel(i *RecordId, h *uint32, l []LogLevel
 	}
 	r = nil
 	var r_ *rpc_thrift.RecordIdU32LogRecordSequence
-	if r_, err = p.client.RetrieveRecordsByLevel(i_, h_, l_); err != nil {
+	if r_, err = p.cli.RetrieveRecordsByLevel(i_, h_, l_); err != nil {
 		return
 	}
 	*i = RecordId(r_.CurrentId)
@@ -216,7 +235,7 @@ func (p *thrift_cli) RetrieveRecordsByProducerName(i *RecordId, h *uint32, n []s
 	h_ := rpc_thrift.U32(*h)
 	r = nil
 	var r_ *rpc_thrift.RecordIdU32LogRecordSequence
-	if r_, err = p.client.RetrieveRecordsByProducerName(i_, h_, n); err != nil {
+	if r_, err = p.cli.RetrieveRecordsByProducerName(i_, h_, n); err != nil {
 		return
 	}
 	*i = RecordId(r_.CurrentId)
@@ -230,11 +249,216 @@ func (p *thrift_cli) RetrieveRecordsByProducerId(i *RecordId, h *uint32, d []str
 	h_ := rpc_thrift.U32(*h)
 	r = nil
 	var r_ *rpc_thrift.RecordIdU32LogRecordSequence
-	if r_, err = p.client.RetrieveRecordsByProducerId(i_, h_, d); err != nil {
+	if r_, err = p.cli.RetrieveRecordsByProducerId(i_, h_, d); err != nil {
 		return
 	}
 	*i = RecordId(r_.CurrentId)
 	*h = uint32(r_.HowMany)
 	r = convertLogRecord(r_.Result)
 	return
+}
+
+
+type thrift_han struct {
+	srv Log
+}
+
+func (p *thrift_han) GetMaxSize() (r rpc_thrift.U64, err error) {
+	var r_ uint64
+	r_, err = p.srv.GetMaxSize()
+	if err == nil {
+		r = rpc_thrift.U64(r_)
+	}
+	return
+}
+
+func (p *thrift_han) GetCurrentSize() (r rpc_thrift.U64, err error) {
+	var r_ uint64
+	r_, err = p.srv.GetCurrentSize()
+	if err == nil {
+		r = rpc_thrift.U64(r_)
+	}
+	return
+}
+
+func (p *thrift_han) GetNRecords() (r rpc_thrift.U64, err error) {
+	var r_ uint64
+	r_, err = p.srv.GetNumRecords()
+	if err == nil {
+		r = rpc_thrift.U64(r_)
+	}
+	return	
+}
+
+func (p *thrift_han) GetLogFullAction() (r rpc_thrift.LogFullAction, err error) {
+	var r_ LogFullAction
+	r_, err = p.srv.GetLogFullAction()
+	if err == nil {
+		if r_ == HALT {
+			r = rpc_thrift.LogFullAction_HALT
+		} else {
+			r = rpc_thrift.LogFullAction_WRAP
+		}
+	}
+	return
+}
+
+func (p *thrift_han) GetAvailabilityStatus() (r *rpc_thrift.AvailabilityStatus, err error) {
+	var r_ AvailabilityStatus
+	r_, err = p.srv.GetAvailabilityStatus()
+	if err == nil {
+		r = &rpc_thrift.AvailabilityStatus{
+			OffDuty: r_.OffDuty,
+			LogFull: r_.LogFull}
+	}
+	return
+}
+
+func (p *thrift_han) GetAdministrativeState() (r rpc_thrift.AdministrativeState, err error) {
+	r_, err := p.srv.GetAdministrativeState()
+	if err == nil {
+		if r_ == LOCKED {
+			r = rpc_thrift.AdministrativeState_locked
+		} else {
+			r = rpc_thrift.AdministrativeState_unlocked
+		}
+	}
+	return
+}
+
+func (p *thrift_han) GetOperationalState() (r rpc_thrift.OperationalState, err error) {
+	var r_ OperationalState
+	r_, err = p.srv.GetOperationalState()
+	if err == nil {
+		if r_ == DISABLED {
+			r = rpc_thrift.OperationalState_disabled
+		} else {
+			r = rpc_thrift.OperationalState_enabled
+		}
+	}
+	return
+}
+
+func (p *thrift_han) SetMaxSize(size rpc_thrift.U64) (ouch *rpc_thrift.InvalidParam, err error) {
+	err = p.srv.SetMaxSize(uint64(size))
+	if err != nil {
+		ouch = &rpc_thrift.InvalidParam{Details: err.Error()}
+	}
+	return
+}
+
+func (p *thrift_han) SetLogFullAction(action rpc_thrift.LogFullAction) (err error) {
+	var a_ LogFullAction
+	if action == rpc_thrift.LogFullAction_HALT {
+		a_ = HALT
+	} else {
+		a_ = WRAP
+	}
+	return p.srv.SetLogFullAction(a_)
+}
+
+func (p *thrift_han) SetAdministrativeState(state rpc_thrift.AdministrativeState) (err error) {
+	var s_ AdministrativeState
+	if state == rpc_thrift.AdministrativeState_unlocked {
+		s_ = UNLOCKED
+	} else {
+		s_ = LOCKED
+	}
+	return p.srv.SetAdministrativeState(s_)
+}
+
+func (p *thrift_han) ClearLog() error {
+	return p.srv.ClearLog()
+}
+
+func (p *thrift_han) Destroy() error {
+	return p.srv.Destroy()
+}
+
+func (p *thrift_han) GetRecordIdFromTime(fromTime *rpc_thrift.LogTime) (r rpc_thrift.RecordId, err error) {
+	t := LogTime{
+		Seconds: int32(fromTime.Seconds),
+		Nanoseconds: int32(fromTime.Nanoseconds)}
+	if r_, err := p.srv.GetRecordIdFromTime(t); err == nil {
+		r = rpc_thrift.RecordId(r_)
+	}
+	return
+}
+
+func (p *thrift_han) RetrieveRecords(currentId rpc_thrift.RecordId, howMany rpc_thrift.U32) (r *rpc_thrift.RecordIdU32LogRecordSequence, err error) {
+	i_ := new(RecordId)
+	*i_ = RecordId(currentId)
+	h_ := new(uint32)
+	*h_ = uint32(howMany)
+	if r_, err := p.srv.RetrieveRecords(i_, h_); err == nil {
+		r = &rpc_thrift.RecordIdU32LogRecordSequence{
+			CurrentId: rpc_thrift.RecordId(*i_),
+			HowMany: rpc_thrift.U32(*h_),
+			Result: logRecordConvert(r_)}
+	}
+	return
+}
+
+func (p *thrift_han) RetrieveRecordsByLevel(currentId rpc_thrift.RecordId, howMany rpc_thrift.U32, valueList rpc_thrift.LogLevelSequence) (r *rpc_thrift.RecordIdU32LogRecordSequence, err error) {
+	i_ := new(RecordId)
+	*i_ = RecordId(currentId)
+	h_ := new(uint32)
+	*h_ = uint32(howMany)
+	s_ := make([]LogLevel, len(valueList))
+	for j, e := range(valueList) {
+		s_[j] = LogLevel(e)
+	}
+	if r_, err := p.srv.RetrieveRecordsByLevel(i_, h_, s_); err == nil {
+		r = &rpc_thrift.RecordIdU32LogRecordSequence{
+			CurrentId: rpc_thrift.RecordId(*i_),
+			HowMany: rpc_thrift.U32(*h_),
+			Result: logRecordConvert(r_)}
+	}
+	return
+}
+
+func (p *thrift_han) RetrieveRecordsByProducerId(currentId rpc_thrift.RecordId, howMany rpc_thrift.U32, valueList rpc_thrift.StringSeq) (r *rpc_thrift.RecordIdU32LogRecordSequence, err error) {
+	i_ := new(RecordId)
+	*i_ = RecordId(currentId)
+	h_ := new(uint32)
+	*h_ = uint32(howMany)
+	if r_, err := p.srv.RetrieveRecordsByProducerId(i_, h_, valueList); err == nil {
+		r = &rpc_thrift.RecordIdU32LogRecordSequence{
+			CurrentId: rpc_thrift.RecordId(*i_),
+			HowMany: rpc_thrift.U32(*h_),
+			Result: logRecordConvert(r_)}
+	}
+	return
+}
+
+func (p *thrift_han) RetrieveRecordsByProducerName(currentId rpc_thrift.RecordId, howMany rpc_thrift.U32, valueList rpc_thrift.StringSeq) (r *rpc_thrift.RecordIdU32LogRecordSequence, err error) {
+	i_ := new(RecordId)
+	*i_ = RecordId(currentId)
+	h_ := new(uint32)
+	*h_ = uint32(howMany)
+	if r_, err := p.srv.RetrieveRecordsByProducerName(i_, h_, valueList); err == nil {
+		r = &rpc_thrift.RecordIdU32LogRecordSequence{
+			CurrentId: rpc_thrift.RecordId(*i_),
+			HowMany: rpc_thrift.U32(*h_),
+			Result: logRecordConvert(r_)}
+	}
+	return
+}
+
+func (p *thrift_han) WriteRecords(records rpc_thrift.ProducerLogRecordSequence) (err error) {
+	r_ := make([]ProducerLogRecord, len(records))
+	for i, e := range(records) {
+		r_[i].ProducerId = e.ProducerId
+		r_[i].ProducerName = e.ProducerName
+		r_[i].Level = LogLevel(e.Level)
+		r_[i].LogData = e.LogData}
+	return p.srv.WriteRecords(r_)
+}
+
+func (p *thrift_han) WriteRecord(record *rpc_thrift.ProducerLogRecord) (err error) {
+	return p.srv.WriteRecord(&ProducerLogRecord{
+		ProducerId: record.ProducerId,
+		ProducerName: record.ProducerName,
+		Level: LogLevel(record.Level),
+		LogData: record.LogData})
 }
