@@ -52,7 +52,7 @@ func (l *logger) GetCurrentSize() (uint64, error) {
 	return l.currentSize, nil
 }
 
-func (l *logger) GetNumRecords() (uint64, error) {
+func (l *logger) GetNRecords() (uint64, error) {
 	if l.err != nil {
 		return 0, l.err
 	}

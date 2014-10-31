@@ -59,7 +59,7 @@ type LogRecord struct {
 type LogStatus interface {
 	GetMaxSize() (uint64, error)
 	GetCurrentSize() (uint64, error)
-	GetNumRecords() (uint64, error)
+	GetNRecords() (uint64, error)
 	GetLogFullAction() (LogFullAction, error)
 	GetAdministrativeState() (AdministrativeState, error)
 	GetAvailabilityStatus() (AvailabilityStatus, error)
@@ -105,7 +105,7 @@ type LogConsumer interface {
 type Log interface {
 	GetMaxSize() (uint64, error)
 	GetCurrentSize() (uint64, error)
-	GetNumRecords() (uint64, error)
+	GetNRecords() (uint64, error)
 	GetLogFullAction() (LogFullAction, error)
 	GetAdministrativeState() (AdministrativeState, error)
 	GetAvailabilityStatus() (AvailabilityStatus, error)

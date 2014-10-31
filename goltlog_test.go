@@ -30,8 +30,8 @@ func testImpl(t *testing.T, m string) {
 	if err := l.WriteRecord(r); err != nil {
 		t.Errorf("logger creation failed %v", err)
 	}
-	if nr, err = l.GetNumRecords(); err != nil {
-		t.Errorf("GetNumRecords failed %v", err)
+	if nr, err = l.GetNRecords(); err != nil {
+		t.Errorf("GetNRecords failed: %v", err)
 	}
 	if nr != 1 {
 		t.Errorf("NumRecord: got %d, want %d", nr, 1)
@@ -39,8 +39,8 @@ func testImpl(t *testing.T, m string) {
 	if err := l.WriteRecord(r); err != nil {
 		t.Errorf("logger creation failed %v", err)
 	}
-	if nr, err = l.GetNumRecords(); err != nil {
-		t.Errorf("GetNumRecords failed %v", err)
+	if nr, err = l.GetNRecords(); err != nil {
+		t.Errorf("GetNRecords failed: %v", err)
 	}
 	if nr != 2 {
 		t.Errorf("NumRecord: got %d, want %d", nr, 2)

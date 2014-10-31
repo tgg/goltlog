@@ -32,7 +32,7 @@ func (p *thrift_cli) GetCurrentSize() (r uint64, err error) {
 	return	
 }
 
-func (p *thrift_cli) GetNumRecords() (r uint64, err error) {
+func (p *thrift_cli) GetNRecords() (r uint64, err error) {
 	var r_ rpc_thrift.U64
 	if r_, err = p.cli.GetNRecords(); err != nil {
 		r = 0
@@ -263,7 +263,7 @@ func (p *thrift_cli) RetrieveRecordsByProducerId(i *RecordId, h *uint32, d []str
 // Handler to a real implementation.
 type thrift_srv struct {
 	h   Log
-	srv *thrift.TSimpleServer
+	srv thrift.TServer
 }
 
 func (p *thrift_srv) GetMaxSize() (r rpc_thrift.U64, err error) {
@@ -286,7 +286,7 @@ func (p *thrift_srv) GetCurrentSize() (r rpc_thrift.U64, err error) {
 
 func (p *thrift_srv) GetNRecords() (r rpc_thrift.U64, err error) {
 	var r_ uint64
-	r_, err = p.h.GetNumRecords()
+	r_, err = p.h.GetNRecords()
 	if err == nil {
 		r = rpc_thrift.U64(r_)
 	}
