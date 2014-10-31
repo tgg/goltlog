@@ -43,10 +43,12 @@ func NewThriftLogServer(h string, p int) (l rpc_thrift.Log, err error) {
 		return
 	}
 
-	l = &thrift_han{srv: handler}
+	log := &thrift_srv{h: handler}
 	processor := rpc_thrift.NewLogProcessor(l)
 	transportFactory := thrift.NewTTransportFactory()
 	server := thrift.NewTSimpleServer4(processor, trans, transportFactory, protocolFactory)
+	log.srv = server
+	l = log
 	go server.Serve()
 	return
 }
